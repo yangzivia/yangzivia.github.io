@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APTI Apple Personality Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apple: {
+                            red: '#FF6B6B',
+                            green: '#4ECDC4',
+                            yellow: '#FFE66D',
+                            dark: '#292F36',
+                            light: '#F7FFF7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['PingFang SC', 'Microsoft YaHei', 'sans-serif']
+                    },
+                    animation: {
+                        'float-slow': 'float 6s ease-in-out infinite',
+                        'bounce-slow': 'bounce 3s ease-in-out infinite',
+                        'spin-slow': 'spin 8s linear infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .card-shadow {
+                box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            }
+            .option-hover {
+                transition: all 0.3s ease;
+            }
+            .option-hover:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(255,107,107,0.2);
+            }
+            .apple-border {
+                position: relative;
+                border: 2px solid #FF6B6B;
+            }
+            .apple-leaf:before {
+                content: "";
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                background-color: #4ECDC4;
+                border-radius: 100px 0 100px 0;
+                top: -8px;
+                left: 50%;
+                transform: translateX(-50%) rotate(-45deg);
+                z-index: 10;
+            }
+            .bg-apple-pattern {
+                background-image: radial-gradient(circle at 20% 20%, rgba(255,107,107,0.05) 0%, transparent 40%),
+                                  radial-gradient(circle at 80% 70%, rgba(78,205,196,0.05) 0%, transparent 40%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-apple-light min-h-screen bg-apple-pattern">
+
+    <!-- Start Page -->
+    <div id="start-page" class="flex flex-col items-center justify-center min-h-screen p-6 text-center relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-apple-yellow/20 rounded-full -z-10 animate-float-slow"></div>
+        <div class="absolute -bottom-16 -left-16 w-40 h-40 bg-apple-red/10 rounded-full -z-10 animate-float-slow"></div>
+        
+        <div class="mb-8 relative">
+            <i class="fa fa-apple text-7xl text-apple-red animate-bounce-slow"></i>
+            <div class="absolute top-0 right-0 w-4 h-4 bg-apple-green rounded-full -z-10 animate-pulse"></div>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-apple-dark mb-4 text-shadow">APTI Apple Personality Test</h1>
+        <p class="text-gray-600 mb-8 max-w-md">Discover your unique apple personality through 20 fun questions</p>
+        
+        <div class="bg-white rounded-2xl p-6 card-shadow max-w-md mb-8 apple-border apple-leaf">
+            <h3 class="font-semibold text-apple-dark mb-2 flex items-center justify-center gap-2">
+                <i class="fa fa-apple text-apple-red"></i> Instructions
+            </h3>
+            <p class="text-gray-500 text-sm">20 questions total. Choose A/B/C/D based on your first instinct.</p>
+        </div>
+        
+        <button id="start-btn" class="bg-apple-red text-white px-10 py-3 rounded-full text-lg font-medium hover:bg-red-500 transition-all shadow-lg hover:shadow-xl hover:scale-105">
+            Start Test
+        </button>
+    </div>
+
+    <!-- Test Page -->
+    <div id="test-page" class="hidden p-6 py-12 max-w-2xl mx-auto relative">
+        <div class="absolute top-10 -left-6 w-16 h-16 bg-apple-green/10 rounded-full -z-10 animate-float-slow"></div>
+        <div class="absolute bottom-20 -right-8 w-20 h-20 bg-apple-red/10 rounded-full -z-10 animate-float-slow"></div>
+        
+        <div class="flex items-center justify-between mb-8 bg-white p-4 rounded-2xl card-shadow apple-border apple-leaf">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-apple text-apple-red"></i>
+                <h2 class="text-2xl font-bold text-apple-dark">APTI Test</h2>
+            </div>
+            <span id="progress" class="bg-apple-green text-white px-4 py-1 rounded-full text-sm font-medium">0/20</span>
+        </div>
+        
+        <div id="questions-container" class="space-y-8">
+            <!-- Questions will load here -->
+        </div>
+        
+        <div class="mt-10 flex justify-between">
+            <button id="prev-btn" class="hidden px-6 py-3 border-2 border-apple-red text-apple-red rounded-full hover:bg-red-50 transition-all flex items-center gap-1 font-medium">
+                <i class="fa fa-arrow-left"></i> Previous
+            </button>
+            <button id="next-btn" class="px-6 py-3 bg-apple-red text-white rounded-full hover:bg-red-500 transition-all flex items-center gap-1 font-medium hover:shadow-lg">
+                Next <i class="fa fa-arrow-right"></i>
+            </button>
+            <button id="submit-btn" class="hidden px-8 py-3 bg-apple-dark text-white rounded-full hover:bg-black transition-all flex items-center gap-1 font-medium hover:shadow-lg">
+                See Results <i class="fa fa-check"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Result Page -->
+    <div id="result-page" class="hidden p-6 py-12 max-w-3xl mx-auto">
+        <div class="text-center mb-8 relative">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 -z-10 w-24 h-24 bg-apple-yellow/20 rounded-full animate-pulse"></div>
+            <i class="fa fa-apple text-6xl text-apple-red mb-4 animate-bounce-slow"></i>
+            <h2 class="text-3xl font-bold text-apple-dark mb-2">Your Apple Personality Result</h2>
+            <p class="text-gray-500">Test completed! Your unique personality is ready.</p>
+        </div>
+
+        <div id="result-card" class="bg-white rounded-2xl p-8 card-shadow mb-8 apple-border apple-leaf">
+            <!-- Result content here -->
+        </div>
+
+        <div class="text-center">
+            <button id="restart-btn" class="px-8 py-3 bg-apple-red text-white rounded-full hover:bg-red-500 transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                <i class="fa fa-refresh mr-2"></i> Retake Test
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // All questions translated to natural English
+        const questions = [
+            {
+                title: "If you were growing an apple tree, you would prefer to:",
+                options: [
+                    "A. Follow strict gardening rules to keep it neat and perfect.",
+                    "B. Let it grow naturally and embrace its unique shape.",
+                    "C. Use science and data to grow the sweetest fruit possible.",
+                    "D. Let it grow wild and become one-of-a-kind."
+                ]
+            },
+            {
+                title: "When you see an apple with small spots, you would:",
+                options: [
+                    "A. Reject it because imperfections ruin its appearance.",
+                    "B. Eat it anyway — imperfections are part of life.",
+                    "C. Analyze the spots to understand what caused them.",
+                    "D. Appreciate its uniqueness; no two apples are the same."
+                ]
+            },
+            {
+                title: "During apple harvest season, you enjoy:",
+                options: [
+                    "A. An organized orchard with uniform, perfect apples.",
+                    "B. A warm, lively atmosphere with friends and family.",
+                    "C. Quietly thinking under the tree about life and nature.",
+                    "D. Running freely and picking apples randomly for fun."
+                ]
+            },
+            {
+                title: "When you receive a fancy apple gift box, you care most about:",
+                options: [
+                    "A. Neat, elegant, and professional presentation.",
+                    "B. The sweet smell and warm feeling it brings.",
+                    "C. The story and meaning behind the apples.",
+                    "D. Creative and unique design that stands out."
+                ]
+            },
+            {
+                title: "When an apple falls from a tree, your first thought is:",
+                options: [
+                    "A. It’s ripe — that’s just how nature works.",
+                    "B. It’s cute; it must want to go home.",
+                    "C. Why does it fall down instead of up?",
+                    "D. What new ideas or surprises could this bring?"
+                ]
+            },
+            {
+                title: "You prefer apples that taste:",
+                options: [
+                    "A. Sweet, solid, and consistent.",
+                    "B. A balanced mix of sweet and sour.",
+                    "C. Scientifically balanced and fully ripe.",
+                    "D. Bold, intense, and full of surprise."
+                ]
+            },
+            {
+                title: "If apples could talk, they would tell you to:",
+                options: [
+                    "A. Follow rules and stay in order.",
+                    "B. Share kindness and warmth with others.",
+                    "C. Look deeper than the surface.",
+                    "D. Be creative and break the routine."
+                ]
+            },
+            {
+                title: "In a discussion about apples, you want to talk about:",
+                options: [
+                    "A. Standards, quality control, and organization.",
+                    "B. Culture, feelings, and warm traditions.",
+                    "C. History, myths, and deep meanings.",
+                    "D. Innovation, branding, and new ideas."
+                ]
+            },
+            {
+                title: "You believe the best destiny for an apple is to:",
+                options: [
+                    "A. Stay perfect and never rot or go to waste.",
+                    "B. Be eaten by family and bring nutrition and joy.",
+                    "C. Become a seed and grow into a new tree.",
+                    "D. Return to nature and feed the earth."
+                ]
+            },
+            {
+                title: "Your attitude toward imperfection is:",
+                options: [
+                    "A. Imperfection is a flaw; I prefer completeness.",
+                    "B. Imperfection is real and acceptable.",
+                    "C. Imperfection has a deep story to tell.",
+                    "D. Imperfection means room for change and creativity."
+                ]
+            },
+            {
+                title: "Which apple appeals to you most?",
+                options: [
+                    "A. Calm, steady, and reliable.",
+                    "B. Soft, warm, and sweet.",
+                    "C. Bright, energetic, and full of light.",
+                    "D. Mysterious, deep, and thoughtful."
+                ]
+            },
+            {
+                title: "If you were an apple, you’d want to be:",
+                options: [
+                    "A. Carefully chosen and valued for your reliability.",
+                    "B. Gently loved and enjoyed with warmth.",
+                    "C. Deeply understood, not just seen.",
+                    "D. Used in new, creative, and unexpected ways."
+                ]
+            },
+            {
+                title: "When making apple pie, you focus on:",
+                options: [
+                    "A. Following the recipe exactly and precisely.",
+                    "B. Making it taste good for everyone you love.",
+                    "C. Understanding why ingredients work together.",
+                    "D. Creating a unique, never-seen-before design."
+                ]
+            },
+            {
+                title: "To you, the smell of an apple is:",
+                options: [
+                    "A. Pure, strong, and consistent — a sign of quality.",
+                    "B. Warm, comforting, and full of kindness.",
+                    "C. Complex, meaningful, and full of life.",
+                    "D. A hint of something new and exciting."
+                ]
+            },
+            {
+                title: "While traveling, you want your apple to:",
+                options: [
+                    "A. Stay fresh and dependable no matter what.",
+                    "B. Taste sweet and calm your tired mood.",
+                    "C. Keep its original flavor no matter the environment.",
+                    "D. Bring joy and surprise to a boring trip."
+                ]
+            },
+            {
+                title: "You want your life to be like an apple that:",
+                options: [
+                    "A. Is responsible, reliable, and follows principles.",
+                    "B. Is warm, kind, and brings happiness to others.",
+                    "C. Is wise, clear-minded, and understands life deeply.",
+                    "D. Is free, unique, and lives by its own rules."
+                ]
+            },
+            {
+                title: "Your attitude toward knowledge is like:",
+                options: [
+                    "A. Choosing only high-quality, truthful information.",
+                    "B. Savoring knowledge gently and feeling its value.",
+                    "C. Digging deep to understand the root of things.",
+                    "D. Challenging old ideas and creating new ones."
+                ]
+            },
+            {
+                title: "The most charming thing about apples is:",
+                options: [
+                    "A. Their round, perfect shape and harmony.",
+                    "B. Their meaning of peace and good luck.",
+                    "C. Their rich history and stories.",
+                    "D. Their ability to become anything."
+                ]
+            },
+            {
+                title: "If apples had personalities, you would be:",
+                options: [
+                    "A. Quiet but strong, taking responsibility seriously.",
+                    "B. Warm and friendly, bringing people together.",
+                    "C. Independent and thoughtful, with a rich inner world.",
+                    "D. Wild and free, always exploring new paths."
+                ]
+            },
+            {
+                title: "The real meaning of apples to you is:",
+                options: [
+                    "A. Order and responsibility — stay steady and honest.",
+                    "B. Love and connection — share warmth with others.",
+                    "C. Truth and awareness — think independently.",
+                    "D. Change and creation — break old rules."
+                ]
+            }
+        ];
+
+        // English Personality Results
+        const personalities = [
+            {
+                name: "Hesperides Guardian Golden Apple",
+                icon: "fa-shield",
+                color: "text-apple-dark",
+                story: "In Greek mythology, the golden apple tree was a wedding gift from Gaia to Zeus and Hera. The Hesperides nymphs and the hundred-eyed giant Argus guarded it day and night to protect divine order. The golden apples symbolize eternal order, responsibility, and unshakable faithfulness.",
+                desc: "You have strong principles, discipline, and reliability. You value order, keep promises, and take responsibility seriously. People see you as steady, trustworthy, and calm under pressure."
+            },
+            {
+                name: "Tang Dynasty Pingguo Fruit",
+                icon: "fa-heart",
+                color: "text-pink-500",
+                story: "In ancient China, apples (pingguo) symbolized peace, reunion, and gentle love. They were given as gifts to express care and warm wishes. Soft, fragrant, and elegant, they carry the quiet kindness of Eastern culture.",
+                desc: "You are gentle, empathetic, and warm-hearted. You care deeply about others, value harmony, and spread comfort and joy to everyone around you."
+            },
+            {
+                name: "Eden Forbidden Fruit of Wisdom",
+                icon: "fa-lightbulb-o",
+                color: "text-yellow-500",
+                story: "In the Bible, the forbidden fruit from the Tree of Knowledge gave humans self-awareness and wisdom. It represents awakening, curiosity, and the courage to understand the world.",
+                desc: "You are thoughtful, curious, and independent. You love learning, seek truth, and prefer to understand the deeper meaning behind everything."
+            },
+            {
+                name: "Alchemist’s Secret Truth Apple",
+                icon: "fa-flask",
+                color: "text-purple-500",
+                story: "Medieval alchemists searched for a sacred apple that held the secrets of nature and the universe. It symbolizes deep research, logic, and the pursuit of knowledge.",
+                desc: "You are logical, insightful, and strategic. You enjoy solving complex problems and think ahead with clarity and focus."
+            },
+            {
+                name: "Newton’s Falling Apple",
+                icon: "fa-magic",
+                color: "text-blue-500",
+                story: "The falling apple that inspired Isaac Newton to discover gravity represents curiosity, observation, and scientific thinking.",
+                desc: "You are practical, calm, and focused. You learn from observation, stay realistic, and solve problems efficiently."
+            },
+            {
+                name: "Wild Apple of the Wilderness",
+                icon: "fa-leaf",
+                color: "text-green-500",
+                story: "Wild apples grow freely in nature without human care. They represent authenticity, freedom, and natural beauty.",
+                desc: "You are free-spirited, genuine, and independent. You live by your own rules and love being true to yourself."
+            },
+            {
+                name: "Fairy Tale Wish Apple",
+                icon: "fa-star",
+                color: "text-purple-400",
+                story: "In fairy tales, magic apples grant wishes and bring hope. They represent innocence, dreams, and gentle imagination.",
+                desc: "You are optimistic, romantic, and kind. You believe in goodness and keep your childlike heart."
+            },
+            {
+                name: "Norse Youth Apple",
+                icon: "fa-sun-o",
+                color: "text-orange-500",
+                story: "In Norse mythology, Idunn’s apples kept the gods young and energetic. They symbolize vitality, curiosity, and eternal youthfulness.",
+                desc: "You are energetic, curious, and full of life. You love exploring new things and stay positive no matter what."
+            },
+            {
+                name: "Peace Apple of Family",
+                icon: "fa-home",
+                color: "text-red-400",
+                story: "Around the world, apples represent peace, safety, and family love. They are simple but full of warmth.",
+                desc: "You are loving, loyal, and family-oriented. You create warmth and safety for the people you care about."
+            },
+            {
+                name: "Greek Discord Apple",
+                icon: "fa-bolt",
+                color: "text-red-600",
+                story: "The golden apple of discord started the Trojan War. It represents passion, challenge, and boldness.",
+                desc: "You are passionate, confident, and brave. You aren’t afraid to stand out and follow your heart."
+            },
+            {
+                name: "Silk Road Honey Apple",
+                icon: "fa-map",
+                color: "text-amber-600",
+                story: "Apples traveled along the Silk Road, connecting cultures and bringing sweetness to travelers. They symbolize connection and kindness.",
+                desc: "You are friendly, social, and kind. You bring people together and make everyone feel welcome."
+            },
+            {
+                name: "Traveler’s Rescue Apple",
+                icon: "fa-life-ring",
+                color: "text-yellow-400",
+                story: "In folk tales, lost travelers found hope and strength from a single apple. It symbolizes hope, positivity, and survival.",
+                desc: "You are optimistic, cheerful, and encouraging. You light up rooms and help others feel hopeful."
+            },
+            {
+                name: "Luo Chuan Prosperity Apple",
+                icon: "fa-tree",
+                color: "text-green-700",
+                story: "Apples helped farming communities grow and thrive. They represent hard work, stability, and real achievement.",
+                desc: "You are hardworking, responsible, and down-to-earth. You get things done and earn respect through effort."
+            },
+            {
+                name: "Turing’s Apple of Courage",
+                icon: "fa-microchip",
+                color: "text-indigo-600",
+                story: "Alan Turing used the apple as a symbol of genius, innovation, and standing up for truth. It represents bravery and vision.",
+                desc: "You are intelligent, brave, and visionary. You stand for what you believe in and think differently."
+            },
+            {
+                name: "Snow White Poison Apple",
+                icon: "fa-diamond",
+                color: "text-pink-600",
+                story: "The glamorous but dangerous apple represents charm, mystery, and contrast between appearance and truth.",
+                desc: "You are charming, smart, and adaptable. You look gentle but have strong inner judgment."
+            },
+            {
+                name: "Jobs’ Bitten Creative Apple",
+                icon: "fa-apple",
+                color: "text-gray-800",
+                story: "Apple’s bitten logo symbolizes imperfection, creativity, and changing the world. It represents innovation and courage.",
+                desc: "You are creative, unique, and bold. You think outside the box and aren’t afraid to be different."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = Array(questions.length).fill(null);
+        let aCount = 0, bCount = 0, cCount = 0, dCount = 0;
+
+        const startPage = document.getElementById('start-page');
+        const testPage = document.getElementById('test-page');
+        const resultPage = document.getElementById('result-page');
+        const startBtn = document.getElementById('start-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const progress = document.getElementById('progress');
+        const questionsContainer = document.getElementById('questions-container');
+        const resultCard = document.getElementById('result-card');
+
+        function renderQuestion() {
+            questionsContainer.innerHTML = '';
+            const q = questions[currentQuestion];
+            
+            const questionEl = document.createElement('div');
+            questionEl.className = 'bg-white rounded-2xl p-6 card-shadow apple-border apple-leaf';
+            questionEl.innerHTML = `
+                <h3 class="text-xl font-semibold text-apple-dark mb-4 flex items-center gap-2">
+                    <i class="fa fa-apple text-apple-red text-lg"></i>
+                    ${currentQuestion + 1}. ${q.title}
+                </h3>
+                <div class="space-y-3">
+                    ${q.options.map((opt, idx) => `
+                        <div class="option-hover p-4 border ${answers[currentQuestion] === idx ? 'border-apple-red bg-red-50' : 'border-gray-200'} rounded-xl cursor-pointer transition-all" data-idx="${idx}">
+                            ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            questionsContainer.appendChild(questionEl);
+            
+            questionEl.querySelectorAll('[data-idx]').forEach(option => {
+                option.addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.idx);
+                    answers[currentQuestion] = idx;
+                    renderQuestion();
+                });
+            });
+            
+            progress.textContent = `${currentQuestion + 1}/${questions.length}`;
+            prevBtn.classList.toggle('hidden', currentQuestion === 0);
+            nextBtn.classList.toggle('hidden', currentQuestion === questions.length - 1);
+            submitBtn.classList.toggle('hidden', currentQuestion !== questions.length - 1);
+        }
+
+        function calculateResult() {
+            aCount = answers.filter(a => a === 0).length;
+            bCount = answers.filter(a => a === 1).length;
+            cCount = answers.filter(a => a === 2).length;
+            dCount = answers.filter(a => a === 3).length;
+            
+            let maxCount = Math.max(aCount, bCount, cCount, dCount);
+            let personalityIndex = 0;
+            
+            if (aCount === maxCount) {
+                if (bCount > cCount && bCount > dCount) personalityIndex = 0;
+                else if (cCount > bCount && cCount > dCount) personalityIndex = 4;
+                else if (dCount > bCount && dCount > cCount) personalityIndex = 12;
+                else personalityIndex = 0;
+            } else if (bCount === maxCount) {
+                if (aCount > cCount && aCount > dCount) personalityIndex = 1;
+                else if (cCount > aCount && cCount > dCount) personalityIndex = 8;
+                else if (dCount > aCount && dCount > cCount) personalityIndex = 10;
+                else personalityIndex = 1;
+            } else if (cCount === maxCount) {
+                if (aCount > bCount && aCount > dCount) personalityIndex = 2;
+                else if (bCount > aCount && bCount > dCount) personalityIndex = 9;
+                else if (dCount > aCount && dCount > bCount) personalityIndex = 13;
+                else personalityIndex = 2;
+            } else if (dCount === maxCount) {
+                if (aCount > bCount && aCount > cCount) personalityIndex = 3;
+                else if (bCount > aCount && bCount > cCount) personalityIndex = 5;
+                else if (cCount > aCount && cCount > bCount) personalityIndex = 14;
+                else personalityIndex = 15;
+            }
+            
+            return personalities[personalityIndex];
+        }
+
+        function renderResult(personality) {
+            resultCard.innerHTML = `
+                <div class="text-center mb-6">
+                    <i class="fa ${personality.icon} text-5xl ${personality.color} mb-4"></i>
+                    <h3 class="text-2xl font-bold text-apple-dark">${personality.name}</h3>
+                </div>
+                <div class="mb-6">
+                    <h4 class="font-semibold text-apple-red mb-2 flex items-center gap-2">
+                        <i class="fa fa-book"></i> Story
+                    </h4>
+                    <p class="text-gray-600 text-sm leading-relaxed">${personality.story}</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-apple-green mb-2 flex items-center gap-2">
+                        <i class="fa fa-star"></i> Personality
+                    </h4>
+                    <p class="text-gray-700 leading-relaxed">${personality.desc}</p>
+                </div>
+            `;
+        }
+
+        startBtn.addEventListener('click', () => {
+            startPage.classList.add('hidden');
+            testPage.classList.remove('hidden');
+            renderQuestion();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (answers[currentQuestion] !== null) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                alert('Please select an option~');
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentQuestion--;
+            renderQuestion();
+        });
+
+        submitBtn.addEventListener('click', () => {
+            if (answers[currentQuestion] !== null) {
+                const result = calculateResult();
+                testPage.classList.add('hidden');
+                resultPage.classList.remove('hidden');
+                renderResult(result);
+            } else {
+                alert('Please select an option~');
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = Array(questions.length).fill(null);
+            resultPage.classList.add('hidden');
+            startPage.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
